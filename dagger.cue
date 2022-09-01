@@ -34,12 +34,17 @@ dagger.#Plan & {
         // Build server
         build_server: bash.#Run & {
             input: _pull_dotnet.output
-            mounts: server: {
+            mounts: "server project files": {
                 contents: _checkoutServer.output
-                dest: "."
+                dest: "/server"
             }
 
-            script: contents: "dotnet build -o ./out"
+            script: contents: """
+            ls /server -l
+            dotnet build /server/Server.fsproj -o ./out
+            """
+
+            export: directories: "/out": dagger.#FS
         }
 
         // Build app
