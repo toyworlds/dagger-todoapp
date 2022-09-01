@@ -31,26 +31,28 @@ dagger.#Plan & {
             path: "Server"
         }
 
-        // Build server
-        build_server: bash.#Run & {
-            input: _pull_dotnet.output
-            mounts: "server project files": {
-                contents: _checkoutServer.output
-                dest: "/server"
+        build: {
+            // Build server
+            server: bash.#Run & {
+                input: _pull_dotnet.output
+                mounts: "server project files": {
+                    contents: _checkoutServer.output
+                    dest: "/server"
+                }
+
+                script: contents: """
+                ls /server -l
+                dotnet build /server/Server.fsproj -o ./out
+                """
+
+                export: directories: "/out": dagger.#FS
             }
 
-            script: contents: """
-            ls /server -l
-            dotnet build /server/Server.fsproj -o ./out
-            """
-
-            export: directories: "/out": dagger.#FS
-        }
-
-        // Build app
-		build_client: yarn.#Script & {
-            name:   "build"
-            source: actions.source.output
+            // Build app
+            client: yarn.#Script & {
+                name:   "build"
+                source: actions.source.output
+            }
         }
 
 		// Test todoapp
