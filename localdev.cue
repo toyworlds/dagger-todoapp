@@ -5,7 +5,7 @@ import (
 )
 
 client: {
-	filesystem: "./build": write: contents: actions.build.output
+	filesystem: "./build": write: contents: actions.build_client.output
 	env: {
 		NETLIFY_TOKEN: dagger.#Secret
 		USER:          string

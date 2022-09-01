@@ -2,10 +2,11 @@ package todoapp
 
 import (
 	"dagger.io/dagger"
-
 	"dagger.io/dagger/core"
-	"universe.dagger.io/netlify"
+
 	"universe.dagger.io/yarn"
+	"universe.dagger.io/bash"
+    "universe.dagger.io/docker"
 )
 
 dagger.#Plan & {
@@ -22,11 +23,30 @@ dagger.#Plan & {
 			]
 		}
 
-		// Build todoapp
-		build: yarn.#Script & {
-			name:   "build"
-			source: actions.source.output
-		}
+        _pull_dotnet: docker.#Pull & {
+            source: "mcr.microsoft.com/dotnet/sdk:6.0"
+        }
+
+        _checkoutServer: core.#Source & {
+            path: "Server"
+        }
+
+        // Build server
+        build_server: bash.#Run & {
+            input: _pull_dotnet.output
+            mounts: server: {
+                contents: _checkoutServer.output
+                dest: "."
+            }
+
+            script: contents: "dotnet build -o ./out"
+        }
+
+        // Build app
+		build_client: yarn.#Script & {
+            name:   "build"
+            source: actions.source.output
+        }
 
 		// Test todoapp
 		test: yarn.#Script & {
@@ -39,12 +59,6 @@ dagger.#Plan & {
 			// to be treated as fatal errors.
 			// See https://create-react-app.dev/docs/advanced-configuration
 			container: env: CI: "true"
-		}
-
-		// Deploy todoapp
-		deploy: netlify.#Deploy & {
-			contents: actions.build.output
-			site:     string | *"dagger-todoapp"
 		}
 	}
 }
