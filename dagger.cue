@@ -31,6 +31,7 @@ dagger.#Plan & {
             path: "Server"
         }
 
+        // Build client and server
         build: {
             // Build server
             server: bash.#Run & {

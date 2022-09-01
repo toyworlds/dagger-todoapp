@@ -11,4 +11,6 @@ client: {
     }
 }
 
-actions: {} // not sure why this is necessary
+actions: {}
+    // not sure why this is necessary
+    // maybe when it parses the thing above it starts looking for an actions?
